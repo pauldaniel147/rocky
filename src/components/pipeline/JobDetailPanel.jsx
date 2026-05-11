@@ -567,58 +567,45 @@ export function JobDetailPanel({ job, onClose, onArchive, onUnarchive, updateJob
                     Tailor Resume
                   </button>
                 </div>
-                <button
-                  onClick={handleReanalyze}
-                  disabled={reanalyzing || !job.jd}
-                  style={{
-                    width: '100%',
-                    padding: '12px 20px',
-                    marginBottom: '24px',
-                    background: reanalyzing ? '#f9f6f0' : '#c4944a',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    cursor: reanalyzing || !job.jd ? 'not-allowed' : 'pointer',
-                    opacity: reanalyzing || !job.jd ? 0.5 : 1,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  {reanalyzing ? '🔄 Re-analyzing...' : '🔄 Re-Analyze with Latest Intel'}
-                </button>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                  <button
+                    onClick={handleReanalyze}
+                    disabled={reanalyzing || !job.jd}
+                    style={{
+                      flex: 1,
+                      padding: '12px 20px',
+                      background: 'white',
+                      border: '1px solid #d8cdb8',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      cursor: reanalyzing || !job.jd ? 'not-allowed' : 'pointer',
+                      opacity: reanalyzing || !job.jd ? 0.5 : 1,
+                      color: '#1a1714',
+                      fontFamily: 'var(--font-family-body)',
+                    }}
+                  >
+                    {reanalyzing ? 'Re-analyzing...' : 'Re-Analyze'}
+                  </button>
+                  <button
+                    onClick={handleArchive}
+                    style={{
+                      flex: 1,
+                      padding: '12px 20px',
+                      background: 'white',
+                      border: '1px solid #d8cdb8',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      color: '#6a6258',
+                      fontFamily: 'var(--font-family-body)',
+                    }}
+                  >
+                    Archive Job
+                  </button>
+                </div>
               </>
-            )}
-
-            {/* Archive button */}
-            {!job.archived && (
-              <button
-                onClick={handleArchive}
-                style={{
-                  width: '100%',
-                  padding: '10px 20px',
-                  marginBottom: '24px',
-                  background: '#ffffff',
-                  border: '1px solid #d8cdb8',
-                  borderRadius: '10px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: '#6a6258',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#f9f6f0'
-                  e.currentTarget.style.borderColor = '#9a9082'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#ffffff'
-                  e.currentTarget.style.borderColor = '#d8cdb8'
-                }}
-              >
-                Archive Job
-              </button>
             )}
 
             {/* Deadline section */}
