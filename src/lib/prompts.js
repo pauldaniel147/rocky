@@ -54,14 +54,18 @@ JSON format:
 Be specific. Reference company names. Call out upcoming deadlines urgently. Call out stale applications. Be encouraging but honest.`
 }
 
-export function prescreenPrompt(preferences, profile) {
+export function prescreenPrompt(preferences, profile, webSearchResults = null) {
   const salaryRange = profile.expectedSalaryMin && profile.expectedSalaryMax
     ? `₹${profile.expectedSalaryMin}L - ₹${profile.expectedSalaryMax}L`
     : profile.expectedSalaryMin
     ? `₹${profile.expectedSalaryMin}L+`
     : 'Not specified'
 
-  return `You are Rocky, an AI job search assistant. Analyze this job description for a ${profile.yearsExp}-year ${profile.field} professional.
+  const searchContext = webSearchResults
+    ? `\n\nRECENT WEB SEARCH RESULTS (${webSearchResults.searchedAt}):\n${webSearchResults.summary}\n\nUse these recent search results to inform your analysis. This information is more current than your training data.`
+    : ''
+
+  return `You are Rocky, an AI job search assistant. Analyze this job description for a ${profile.yearsExp}-year ${profile.field} professional.${searchContext}
 
 User preferences:
 - Work hours: ${preferences.workHours}
@@ -80,7 +84,7 @@ Analyze for:
    - Known work culture (hours, flexibility, remote policy)
    - Leadership quality and team dynamics if known
    - Funding stage, growth trajectory, financial health
-   - Recent news (layoffs, pivots, acquisitions) - note your knowledge is from Jan 2025
+   - Recent news (layoffs, pivots, acquisitions) - USE WEB SEARCH RESULTS if provided, otherwise note your knowledge is from Jan 2025
 
 4. Product & Space Intelligence: ONLY include if you have reliable knowledge. If unsure, say "Limited information - verify independently":
    - What product/service they build (be specific, admit if unclear)

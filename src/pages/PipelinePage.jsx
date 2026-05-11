@@ -7,6 +7,7 @@ import { useAI } from '../hooks/useAI'
 import { prescreenPrompt } from '../lib/prompts'
 import { storage } from '../lib/storage'
 import { parseAIResponse } from '../lib/json-utils'
+import { searchCompanyInfo } from '../lib/search'
 
 const STAGES = [
   { id: 'saved', label: 'Saved', color: '#9a9082' },
@@ -86,7 +87,11 @@ export function PipelinePage() {
       try {
         const preferences = storage.getPreferences()
         const profile = storage.getProfile()
-        const systemPrompt = prescreenPrompt(preferences, profile)
+
+        // Search for recent company info
+        const webSearchResults = await searchCompanyInfo(jobData.company)
+
+        const systemPrompt = prescreenPrompt(preferences, profile, webSearchResults)
 
         const salaryText = jobData.salary
           ? `\nSalary Range: ${jobData.salary.expectedMin || ''}${jobData.salary.expectedMin && jobData.salary.expectedMax ? ' - ' : ''}${jobData.salary.expectedMax || ''} LPA`

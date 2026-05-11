@@ -3,6 +3,7 @@
 
 const KEYS = {
   API_KEY: 'rocky:api_key',
+  BRAVE_SEARCH_KEY: 'rocky:brave_search_key',
   PIPELINE: 'rocky:pipeline',
   PREFERENCES: 'rocky:preferences',
   CAREER_STORY: 'rocky:career_story',
@@ -18,6 +19,11 @@ export const storage = {
   getApiKey: () => localStorage.getItem(KEYS.API_KEY),
   setApiKey: (key) => localStorage.setItem(KEYS.API_KEY, key),
   clearApiKey: () => localStorage.removeItem(KEYS.API_KEY),
+
+  // Brave Search API Key (optional)
+  getBraveSearchKey: () => localStorage.getItem(KEYS.BRAVE_SEARCH_KEY),
+  setBraveSearchKey: (key) => localStorage.setItem(KEYS.BRAVE_SEARCH_KEY, key),
+  clearBraveSearchKey: () => localStorage.removeItem(KEYS.BRAVE_SEARCH_KEY),
 
   // Pipeline
   getPipeline: () => {

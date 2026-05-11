@@ -11,6 +11,9 @@ export function SettingsPage() {
   const [newApiKey, setNewApiKey] = useState('')
   const [apiKeyError, setApiKeyError] = useState('')
   const [apiKeySuccess, setApiKeySuccess] = useState(false)
+  const [showBraveKeyUpdate, setShowBraveKeyUpdate] = useState(false)
+  const [newBraveKey, setNewBraveKey] = useState('')
+  const [braveKeySuccess, setBraveKeySuccess] = useState(false)
   const [editingProfile, setEditingProfile] = useState(false)
   const [editingPreferences, setEditingPreferences] = useState(false)
   const [editingExpectations, setEditingExpectations] = useState(false)
@@ -101,6 +104,31 @@ export function SettingsPage() {
     setTimeout(() => {
       setShowApiKeyUpdate(false)
       setApiKeySuccess(false)
+    }, 2000)
+  }
+
+  const handleUpdateBraveKey = () => {
+    setBraveKeySuccess(false)
+
+    if (!newBraveKey.trim()) {
+      storage.clearBraveSearchKey()
+      setBraveKeySuccess(true)
+      setNewBraveKey('')
+      setTimeout(() => {
+        setShowBraveKeyUpdate(false)
+        setBraveKeySuccess(false)
+      }, 2000)
+      return
+    }
+
+    storage.setBraveSearchKey(newBraveKey)
+    setBraveKeySuccess(true)
+    setNewBraveKey('')
+
+    // Hide form after 2 seconds
+    setTimeout(() => {
+      setShowBraveKeyUpdate(false)
+      setBraveKeySuccess(false)
     }, 2000)
   }
 
@@ -644,6 +672,92 @@ export function SettingsPage() {
                       setNewApiKey('')
                       setApiKeyError('')
                       setApiKeySuccess(false)
+                    }}
+                    style={{
+                      padding: '10px 16px',
+                      background: 'transparent',
+                      border: '1px solid #d8cdb8',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      color: '#6a6258',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Brave Search API Key Section */}
+          <div className="card" style={{ padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '10px', fontWeight: 600, marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.18em', color: '#1a1714' }}>
+              Brave Search API Key (Optional)
+            </h3>
+
+            {!showBraveKeyUpdate ? (
+              <div>
+                <p style={{ fontSize: '13px', color: '#6a6258', marginBottom: '16px', fontFamily: 'var(--font-family-body)', lineHeight: 1.6 }}>
+                  Add a Brave Search API key to get real-time company intelligence (recent news, layoffs, funding) when pre-screening jobs. Without it, Rocky uses training data from January 2025.
+                </p>
+                <p style={{ fontSize: '12px', color: '#9a9082', marginBottom: '16px', fontFamily: 'var(--font-family-body)', lineHeight: 1.5 }}>
+                  Get a free API key at <a href="https://brave.com/search/api/" target="_blank" rel="noopener noreferrer" style={{ color: '#c4944a', textDecoration: 'underline' }}>brave.com/search/api</a> (2,000 free searches/month)
+                </p>
+                <button
+                  onClick={() => setShowBraveKeyUpdate(true)}
+                  style={{
+                    padding: '10px 16px',
+                    background: 'transparent',
+                    border: '1px solid #d8cdb8',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    color: '#1a1714',
+                    fontWeight: 500,
+                  }}
+                >
+                  {storage.getBraveSearchKey() ? 'Update API key' : 'Add API key'}
+                </button>
+              </div>
+            ) : (
+              <div>
+                <input
+                  type="password"
+                  value={newBraveKey}
+                  onChange={(e) => setNewBraveKey(e.target.value)}
+                  placeholder="BSA..."
+                  className="input"
+                  style={{ marginBottom: '12px', fontFamily: 'var(--font-family-mono)', fontSize: '13px' }}
+                />
+
+                {braveKeySuccess && (
+                  <p style={{ fontSize: '12px', color: '#4a7c59', marginBottom: '12px' }}>
+                    ✓ {newBraveKey.trim() ? 'API key updated' : 'API key removed'} successfully
+                  </p>
+                )}
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={handleUpdateBraveKey}
+                    style={{
+                      padding: '10px 16px',
+                      background: '#1a1714',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      color: '#f1eadc',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {newBraveKey.trim() ? 'Save key' : 'Remove key'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowBraveKeyUpdate(false)
+                      setNewBraveKey('')
+                      setBraveKeySuccess(false)
                     }}
                     style={{
                       padding: '10px 16px',

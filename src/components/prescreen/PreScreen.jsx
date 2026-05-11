@@ -7,6 +7,7 @@ import { usePipeline } from '../../hooks/useStorage'
 import { useNavigate } from 'react-router-dom'
 import { parseAIResponse } from '../../lib/json-utils'
 import { PreScreenForm } from './PreScreenForm'
+import { searchCompanyInfo } from '../../lib/search'
 
 const DRAFT_KEY = 'rocky:prescreen_draft'
 
@@ -99,7 +100,10 @@ export function PreScreen() {
     const profile = storage.getProfile()
 
     try {
-      const systemPrompt = prescreenPrompt(preferences, profile)
+      // Search for recent company info first
+      const webSearchResults = await searchCompanyInfo(company)
+
+      const systemPrompt = prescreenPrompt(preferences, profile, webSearchResults)
       const userMessage = `Job URL: ${jobUrl}\n\nCompany: ${company}\nRole: ${title}\n${salaryMin || salaryMax ? `\nSalary Range: ${salaryMin || ''}${salaryMin && salaryMax ? ' - ' : ''}${salaryMax || ''} LPA` : ''}\n\nJob Description:\n${jd}`
 
       const response = await generate(systemPrompt, userMessage, 2500)
