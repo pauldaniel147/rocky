@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 
 export function ProfileSetup({ onComplete, initialData = null }) {
   const [step, setStep] = useState(1)
-  const [profile, setProfile] = useState(initialData?.profile || {
+  const [profile, setProfile] = useState({
     name: '',
     role: '',
     yearsExp: 5,
@@ -13,6 +13,9 @@ export function ProfileSetup({ onComplete, initialData = null }) {
     expectedSalaryMax: '',
     industryInterests: [],
     spacePreferences: '',
+    ...(initialData?.profile || {}),
+    // Ensure industryInterests is always an array
+    industryInterests: initialData?.profile?.industryInterests || [],
   })
   const [preferences, setPreferences] = useState(initialData?.preferences || {
     workHours: 'standard',
@@ -37,24 +40,26 @@ export function ProfileSetup({ onComplete, initialData = null }) {
   ]
 
   const toggleIndustry = (industry) => {
-    if (profile.industryInterests.includes(industry)) {
+    const interests = profile.industryInterests || []
+    if (interests.includes(industry)) {
       setProfile({
         ...profile,
-        industryInterests: profile.industryInterests.filter(i => i !== industry),
+        industryInterests: interests.filter(i => i !== industry),
       })
     } else {
       setProfile({
         ...profile,
-        industryInterests: [...profile.industryInterests, industry],
+        industryInterests: [...interests, industry],
       })
     }
   }
 
   const addCustomIndustry = () => {
-    if (customIndustry.trim() && !profile.industryInterests.includes(customIndustry.trim())) {
+    const interests = profile.industryInterests || []
+    if (customIndustry.trim() && !interests.includes(customIndustry.trim())) {
       setProfile({
         ...profile,
-        industryInterests: [...profile.industryInterests, customIndustry.trim()],
+        industryInterests: [...interests, customIndustry.trim()],
       })
       setCustomIndustry('')
     }
@@ -303,9 +308,9 @@ export function ProfileSetup({ onComplete, initialData = null }) {
                       fontSize: '0.875rem',
                       borderRadius: '9999px',
                       border: '1px solid',
-                      borderColor: profile.industryInterests.includes(industry) ? '#1a1714' : '#d8cdb8',
-                      background: profile.industryInterests.includes(industry) ? '#1a1714' : 'transparent',
-                      color: profile.industryInterests.includes(industry) ? '#f1eadc' : '#3a342d',
+                      borderColor: (profile.industryInterests || []).includes(industry) ? '#1a1714' : '#d8cdb8',
+                      background: (profile.industryInterests || []).includes(industry) ? '#1a1714' : 'transparent',
+                      color: (profile.industryInterests || []).includes(industry) ? '#f1eadc' : '#3a342d',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
                     }}
