@@ -11,7 +11,7 @@ export class APIError extends Error {
 
 // Use environment variable for API URL, or empty string for production (same domain)
 // In development, defaults to localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3003' : '')
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'development' ? 'http://localhost:3003' : '')
 
 export async function callClaude(systemPrompt, userMessage, maxTokens = 2000) {
   // Get user's API key from localStorage
