@@ -5,9 +5,10 @@ import { usePipeline } from '../../hooks/useStorage'
 import { useNavigate } from 'react-router-dom'
 import { storage } from '../../lib/storage'
 import { useAI } from '../../hooks/useAI'
-import { resumeTailoringPrompt } from '../../lib/prompts'
+import { resumeTailoringPrompt, prescreenPrompt } from '../../lib/prompts'
 import { parseAIResponse } from '../../lib/json-utils'
 import { ResumeTailoringModal } from './ResumeTailoringModal'
+import { searchCompanyInfo } from '../../lib/search'
 
 const STAGE_TASKS = {
   saved: [
@@ -91,6 +92,9 @@ export function JobDetailPanel({ job, onClose, onArchive, onUnarchive, updateJob
   const [tailoringLoading, setTailoringLoading] = useState(false)
   const [newTag, setNewTag] = useState('')
   const commonTags = ['Remote', 'Hybrid', 'Onsite', 'Senior', 'Mid-level', 'Junior', 'Startup', 'Enterprise', 'SaaS', 'Product', 'B2B', 'B2C']
+
+  // Re-analyze
+  const [reanalyzing, setReanalyzing] = useState(false)
 
   // Chat history
   const [chatHistory, setChatHistory] = useState([])
@@ -263,6 +267,55 @@ export function JobDetailPanel({ job, onClose, onArchive, onUnarchive, updateJob
       setTailoringData({ error: err.message || 'Failed to generate advice' })
     } finally {
       setTailoringLoading(false)
+    }
+  }
+
+  const handleReanalyze = async () => {
+    if (!job.jd) {
+      alert('No job description available. Add a JD to re-analyze.')
+      return
+    }
+
+    setReanalyzing(true)
+
+    try {
+      const preferences = storage.getPreferences()
+      const profile = storage.getProfile()
+
+      // Search for recent company info
+      const webSearchResults = await searchCompanyInfo(job.company)
+
+      const systemPrompt = prescreenPrompt(preferences, profile, webSearchResults)
+
+      const salaryText = job.salary?.expectedMin || job.salary?.expectedMax
+        ? `\nSalary Range: ${job.salary.expectedMin || ''}${job.salary.expectedMin && job.salary.expectedMax ? ' - ' : ''}${job.salary.expectedMax || ''} LPA`
+        : ''
+
+      const userMessage = `Job URL: ${job.jobUrl || 'Not provided'}\n\nCompany: ${job.company}\nRole: ${job.role}${salaryText}\n\nJob Description:\n${job.jd}`
+
+      const response = await generate(systemPrompt, userMessage, 2500)
+      const analysisData = parseAIResponse(response)
+
+      // Update job with fresh AI insights
+      updateJob(job.id, {
+        fitScore: analysisData.fitScore,
+        verdict: analysisData.verdict,
+        greenFlags: analysisData.greenFlags,
+        redFlags: analysisData.redFlags,
+        reasoning: analysisData.reasoning,
+        companyInsights: analysisData.companyInsights || '',
+        productInsights: analysisData.productInsights || '',
+        reanalyzedAt: new Date().toISOString(),
+      })
+
+      // Refresh the panel (close and reopen would be ideal, but we'll just alert for now)
+      alert('✓ Job re-analyzed with latest company intelligence!')
+      onClose()
+    } catch (err) {
+      console.error('Re-analysis failed:', err)
+      alert('Failed to re-analyze. Please try again.')
+    } finally {
+      setReanalyzing(false)
     }
   }
 
@@ -485,34 +538,57 @@ export function JobDetailPanel({ job, onClose, onArchive, onUnarchive, updateJob
 
             {/* Action buttons */}
             {!job.archived && (
-              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+              <>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+                  <button
+                    onClick={handlePrepWithCoach}
+                    className="btn-primary"
+                    style={{ flex: 1 }}
+                  >
+                    <span style={{ fontFamily: 'var(--font-family-display)', fontSize: '16px', fontStyle: 'italic' }}>
+                      Prep with Rocky →
+                    </span>
+                  </button>
+                  <button
+                    onClick={handleTailorResume}
+                    style={{
+                      flex: 1,
+                      padding: '14px 20px',
+                      background: 'white',
+                      border: '1px solid #d8cdb8',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font-family-display)',
+                      color: '#1a1714',
+                    }}
+                  >
+                    Tailor Resume
+                  </button>
+                </div>
                 <button
-                  onClick={handlePrepWithCoach}
-                  className="btn-primary"
-                  style={{ flex: 1 }}
-                >
-                  <span style={{ fontFamily: 'var(--font-family-display)', fontSize: '16px', fontStyle: 'italic' }}>
-                    Prep with Rocky →
-                  </span>
-                </button>
-                <button
-                  onClick={handleTailorResume}
+                  onClick={handleReanalyze}
+                  disabled={reanalyzing || !job.jd}
                   style={{
-                    flex: 1,
-                    padding: '14px 20px',
-                    background: 'white',
-                    border: '1px solid #d8cdb8',
+                    width: '100%',
+                    padding: '12px 20px',
+                    marginBottom: '24px',
+                    background: reanalyzing ? '#f9f6f0' : '#c4944a',
+                    border: 'none',
                     borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    fontFamily: 'var(--font-family-display)',
-                    color: '#1a1714',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    cursor: reanalyzing || !job.jd ? 'not-allowed' : 'pointer',
+                    opacity: reanalyzing || !job.jd ? 0.5 : 1,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
                   }}
                 >
-                  Tailor Resume
+                  {reanalyzing ? '🔄 Re-analyzing...' : '🔄 Re-Analyze with Latest Intel'}
                 </button>
-              </div>
+              </>
             )}
 
             {/* Archive button */}
