@@ -96,6 +96,15 @@ export function JobDetailPanel({ job, onClose, onArchive, onUnarchive, updateJob
   // Re-analyze
   const [reanalyzing, setReanalyzing] = useState(false)
 
+  // Job Details editing (comprehensive)
+  const [editingDetails, setEditingDetails] = useState(false)
+  const [detailsForm, setDetailsForm] = useState({
+    company: job.company,
+    role: job.role,
+    jobUrl: job.jobUrl || '',
+    jd: job.jd || '',
+  })
+
   // Chat history
   const [chatHistory, setChatHistory] = useState([])
   const [showChatHistory, setShowChatHistory] = useState(false)
@@ -219,6 +228,26 @@ export function JobDetailPanel({ job, onClose, onArchive, onUnarchive, updateJob
     const updatedTags = tags.filter(t => t !== tag)
     setTags(updatedTags)
     updateJob(job.id, { tags: updatedTags })
+  }
+
+  const handleSaveDetails = () => {
+    updateJob(job.id, {
+      company: detailsForm.company.trim(),
+      role: detailsForm.role.trim(),
+      jobUrl: detailsForm.jobUrl.trim(),
+      jd: detailsForm.jd.trim(),
+    })
+    setEditingDetails(false)
+  }
+
+  const handleCancelDetails = () => {
+    setDetailsForm({
+      company: job.company,
+      role: job.role,
+      jobUrl: job.jobUrl || '',
+      jd: job.jd || '',
+    })
+    setEditingDetails(false)
   }
 
   const handleArchive = () => {
@@ -535,6 +564,185 @@ export function JobDetailPanel({ job, onClose, onArchive, onUnarchive, updateJob
                 </button>
               </div>
             )}
+
+            {/* Job Details Section */}
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{
+                fontSize: '10px',
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: '#1a1714',
+                fontWeight: 600,
+                marginBottom: '14px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+                <span>Job Details</span>
+                {!editingDetails && !job.archived && (
+                  <button
+                    onClick={() => setEditingDetails(true)}
+                    style={{
+                      padding: '4px 10px',
+                      background: 'transparent',
+                      border: '1px solid #d8cdb8',
+                      borderRadius: '6px',
+                      fontSize: '10px',
+                      color: '#6a6258',
+                      cursor: 'pointer',
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
+
+              {editingDetails ? (
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #e6dcc8',
+                  borderRadius: '10px',
+                  padding: '18px',
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                    <div>
+                      <label style={{ fontSize: '11px', fontWeight: 600, color: '#1a1714', marginBottom: '6px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        Company *
+                      </label>
+                      <input
+                        type="text"
+                        value={detailsForm.company}
+                        onChange={(e) => setDetailsForm({ ...detailsForm, company: e.target.value })}
+                        className="input"
+                        style={{ fontSize: '13px' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '11px', fontWeight: 600, color: '#1a1714', marginBottom: '6px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        Role *
+                      </label>
+                      <input
+                        type="text"
+                        value={detailsForm.role}
+                        onChange={(e) => setDetailsForm({ ...detailsForm, role: e.target.value })}
+                        className="input"
+                        style={{ fontSize: '13px' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '11px', fontWeight: 600, color: '#1a1714', marginBottom: '6px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        Job URL
+                      </label>
+                      <input
+                        type="url"
+                        value={detailsForm.jobUrl}
+                        onChange={(e) => setDetailsForm({ ...detailsForm, jobUrl: e.target.value })}
+                        placeholder="https://..."
+                        className="input"
+                        style={{ fontSize: '13px' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '11px', fontWeight: 600, color: '#1a1714', marginBottom: '6px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        Job Description
+                      </label>
+                      <textarea
+                        value={detailsForm.jd}
+                        onChange={(e) => setDetailsForm({ ...detailsForm, jd: e.target.value })}
+                        placeholder="Paste job description..."
+                        className="input"
+                        rows={6}
+                        style={{ fontSize: '13px', resize: 'vertical', fontFamily: 'var(--font-family-body)' }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      onClick={handleSaveDetails}
+                      disabled={!detailsForm.company.trim() || !detailsForm.role.trim()}
+                      style={{
+                        padding: '10px 16px',
+                        background: '#1a1714',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        cursor: detailsForm.company.trim() && detailsForm.role.trim() ? 'pointer' : 'not-allowed',
+                        color: '#f1eadc',
+                        fontWeight: 500,
+                        opacity: detailsForm.company.trim() && detailsForm.role.trim() ? 1 : 0.5,
+                      }}
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={handleCancelDetails}
+                      style={{
+                        padding: '10px 16px',
+                        background: 'transparent',
+                        border: '1px solid #d8cdb8',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        color: '#6a6258',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #e6dcc8',
+                  borderRadius: '10px',
+                  padding: '16px',
+                  fontSize: '13px',
+                  lineHeight: 1.6,
+                  color: '#3a342d',
+                  fontFamily: 'var(--font-family-body)',
+                }}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#9a9082', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Company</div>
+                    <div>{job.company}</div>
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#9a9082', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Role</div>
+                    <div>{job.role}</div>
+                  </div>
+                  {job.jobUrl && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: '#9a9082', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Job URL</div>
+                      <a href={job.jobUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#c4944a', textDecoration: 'underline', wordBreak: 'break-all' }}>
+                        {job.jobUrl}
+                      </a>
+                    </div>
+                  )}
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#9a9082', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Job Description</div>
+                    {job.jd ? (
+                      <div style={{
+                        whiteSpace: 'pre-wrap',
+                        maxHeight: '150px',
+                        overflowY: 'auto',
+                        padding: '10px',
+                        background: '#f9f6f0',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        lineHeight: 1.5,
+                      }}>
+                        {job.jd}
+                      </div>
+                    ) : (
+                      <div style={{ color: '#9a9082', fontStyle: 'italic' }}>
+                        No job description added
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Action buttons */}
             {!job.archived && (
