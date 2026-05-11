@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '../../hooks/useAI'
 import { prescreenPrompt } from '../../lib/prompts'
@@ -8,13 +8,19 @@ import { useNavigate } from 'react-router-dom'
 import { parseAIResponse } from '../../lib/json-utils'
 import { PreScreenForm } from './PreScreenForm'
 
+const DRAFT_KEY = 'rocky:prescreen_draft'
+
 export function PreScreen() {
-  const [jd, setJd] = useState('')
-  const [jobUrl, setJobUrl] = useState('')
-  const [company, setCompany] = useState('')
-  const [title, setTitle] = useState('')
-  const [salaryMin, setSalaryMin] = useState('')
-  const [salaryMax, setSalaryMax] = useState('')
+  // Load draft from localStorage
+  const savedDraft = localStorage.getItem(DRAFT_KEY)
+  const draft = savedDraft ? JSON.parse(savedDraft) : {}
+
+  const [jd, setJd] = useState(draft.jd || '')
+  const [jobUrl, setJobUrl] = useState(draft.jobUrl || '')
+  const [company, setCompany] = useState(draft.company || '')
+  const [title, setTitle] = useState(draft.title || '')
+  const [salaryMin, setSalaryMin] = useState(draft.salaryMin || '')
+  const [salaryMax, setSalaryMax] = useState(draft.salaryMax || '')
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [fetching, setFetching] = useState(false)
@@ -22,6 +28,12 @@ export function PreScreen() {
   const { generate, loading } = useAI()
   const { addJob } = usePipeline()
   const navigate = useNavigate()
+
+  // Auto-save draft whenever form data changes
+  useEffect(() => {
+    const draft = { jd, jobUrl, company, title, salaryMin, salaryMax }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
+  }, [jd, jobUrl, company, title, salaryMin, salaryMax])
 
   const handleUrlChange = async (newUrl) => {
     setJobUrl(newUrl)
@@ -32,7 +44,8 @@ export function PreScreen() {
       setFetching(true)
 
       try {
-        const response = await fetch(`http://localhost:3003/api/scrape-job`, {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'development' ? 'http://localhost:3003' : '')
+        const response = await fetch(`${API_BASE_URL}/api/scrape-job`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url: newUrl }),
@@ -125,7 +138,22 @@ export function PreScreen() {
       stage: 'saved',
     })
 
+    // Clear draft after successful save
+    localStorage.removeItem(DRAFT_KEY)
+
     navigate('/pipeline')
+  }
+
+  const handleClearDraft = () => {
+    setJd('')
+    setJobUrl('')
+    setCompany('')
+    setTitle('')
+    setSalaryMin('')
+    setSalaryMax('')
+    setResult(null)
+    setError(null)
+    localStorage.removeItem(DRAFT_KEY)
   }
 
   const getFitColor = (score) => {
@@ -200,6 +228,7 @@ export function PreScreen() {
               jd={jd}
               setJd={setJd}
               onAnalyze={analyze}
+              onClear={handleClearDraft}
               loading={loading}
               error={error}
               fetching={fetching}

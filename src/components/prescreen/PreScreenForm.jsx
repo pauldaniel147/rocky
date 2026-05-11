@@ -14,6 +14,7 @@ export function PreScreenForm({
   jd,
   setJd,
   onAnalyze,
+  onClear,
   loading,
   error,
   fetching,
@@ -251,7 +252,7 @@ export function PreScreenForm({
       </div>
 
       {/* Analyze button - spans full width */}
-      <div style={{ gridColumn: '1 / -1' }}>
+      <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '12px', alignItems: 'center' }}>
         <button
           onClick={onAnalyze}
           disabled={!jobUrl.trim() || !company.trim() || !title.trim() || !jd.trim() || loading}
@@ -260,6 +261,25 @@ export function PreScreenForm({
         >
           {loading ? 'Analyzing...' : 'Analyze with Rocky →'}
         </button>
+        {(jobUrl || company || title || jd) && (
+          <button
+            onClick={onClear}
+            disabled={loading}
+            style={{
+              padding: '12px 24px',
+              fontSize: '14px',
+              fontWeight: 500,
+              background: 'transparent',
+              color: '#6a6258',
+              border: '1px solid #d8cdb8',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            Clear
+          </button>
+        )}
         {error && (
           <p style={{ color: '#c4534a', marginTop: '12px', fontSize: '13px' }}>
             {error}
