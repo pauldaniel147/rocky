@@ -136,6 +136,28 @@ export function PipelinePage() {
     setDraggedJob(null)
   }
 
+  // Touch support for drag and drop
+  const handleTouchStart = (job, e) => {
+    if (bulkMode) return
+    setDraggedJob(job)
+    e.currentTarget.style.opacity = '0.5'
+  }
+
+  const handleTouchMove = (e) => {
+    e.preventDefault()
+  }
+
+  const handleTouchEnd = (stageId, e) => {
+    if (draggedJob && draggedJob.stage !== stageId) {
+      updateJob(draggedJob.id, { stage: stageId })
+    }
+    // Reset opacity on all cards
+    document.querySelectorAll('[data-job-card]').forEach(card => {
+      card.style.opacity = '1'
+    })
+    setDraggedJob(null)
+  }
+
   const getJobsByStage = (stageId) => {
     let jobs = pipeline.filter(job => {
       // Filter by stage and archived status
@@ -658,6 +680,8 @@ export function PipelinePage() {
                   key={stage.id}
                   onDragOver={handleDragOver}
                   onDrop={() => handleDrop(stage.id)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={(e) => handleTouchEnd(stage.id, e)}
                   style={{
                     background: '#fbf6ea',
                     borderRadius: '12px',
@@ -703,8 +727,10 @@ export function PipelinePage() {
                   {jobs.map(job => (
                     <motion.div
                       key={job.id}
+                      data-job-card
                       draggable={!bulkMode}
                       onDragStart={() => !bulkMode && handleDragStart(job)}
+                      onTouchStart={(e) => handleTouchStart(job, e)}
                       onClick={(e) => handleCardClick(job, e)}
                       layout
                       initial={{ opacity: 0, y: 10 }}
@@ -814,22 +840,56 @@ export function PipelinePage() {
                         {job.role}
                       </div>
 
-                      {/* Fit score if available */}
-                      {job.fitScore && (
-                        <div style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 8px',
-                          background: job.fitScore >= 75 ? 'rgba(74, 124, 89, 0.1)' : 'rgba(196, 148, 74, 0.1)',
-                          borderRadius: '6px',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          color: job.fitScore >= 75 ? '#4a7c59' : '#c4944a',
-                        }}>
-                          {job.fitScore}% fit
+                      {/* Stage selector and fit score */}
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                        <div style={{ position: 'relative', flex: '0 0 auto' }}>
+                          <select
+                            value={job.stage}
+                            onChange={(e) => {
+                              e.stopPropagation()
+                              updateJob(job.id, { stage: e.target.value })
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                              padding: '4px 24px 4px 8px',
+                              fontSize: '10px',
+                              fontWeight: 600,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em',
+                              border: '1px solid #d8cdb8',
+                              borderRadius: '6px',
+                              background: 'white',
+                              color: '#6a6258',
+                              cursor: 'pointer',
+                              appearance: 'none',
+                            }}
+                          >
+                            {STAGES.filter(s => s.id !== 'rejected' && s.id !== 'offer').map(stage => (
+                              <option key={stage.id} value={stage.id}>
+                                {stage.label}
+                              </option>
+                            ))}
+                          </select>
+                          <svg width="10" height="6" viewBox="0 0 10 6" style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                            <path d="M1 1L5 5L9 1" stroke="#6a6258" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
                         </div>
-                      )}
+                        {job.fitScore && (
+                          <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '4px 8px',
+                            background: job.fitScore >= 75 ? 'rgba(74, 124, 89, 0.1)' : 'rgba(196, 148, 74, 0.1)',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            color: job.fitScore >= 75 ? '#4a7c59' : '#c4944a',
+                          }}>
+                            {job.fitScore}% fit
+                          </div>
+                        )}
+                      </div>
 
                       {/* Tags */}
                       {job.tags && job.tags.length > 0 && (
