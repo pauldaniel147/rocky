@@ -63,7 +63,6 @@ export function DailyDigest() {
     const pipeline = storage.getPipeline()
     const checkins = storage.getCheckins()
     const preferences = storage.getPreferences()
-    const profile = storage.getProfile()
 
     try {
       const systemPrompt = isEvening
@@ -125,7 +124,6 @@ export function DailyDigest() {
   }
 
   const dayNumber = storage.getDayNumber()
-  const profile = storage.getProfile()
 
   // Get upcoming deadlines (next 7 days)
   const now = new Date()
