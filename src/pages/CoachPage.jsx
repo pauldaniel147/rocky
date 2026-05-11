@@ -6,14 +6,21 @@ import { usePipeline } from '../hooks/useStorage'
 import { parseAIResponse } from '../lib/json-utils'
 import { useLocation } from 'react-router-dom'
 
+const DRAFT_KEY = 'rocky:coach_input_draft'
+
 export function CoachPage() {
   const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(localStorage.getItem(DRAFT_KEY) || '')
   const [jobContext, setJobContext] = useState(null)
   const { generate, loading } = useAI()
   const { pipeline } = usePipeline()
   const messagesEndRef = useRef(null)
   const location = useLocation()
+
+  // Auto-save input draft
+  useEffect(() => {
+    localStorage.setItem(DRAFT_KEY, input)
+  }, [input])
 
   // Initial load - check for context
   useEffect(() => {
@@ -234,6 +241,7 @@ Format responses in markdown. Be conversational, warm, and strategic.`
 
     setMessages(prev => [...prev, userMessage])
     setInput('')
+    localStorage.removeItem(DRAFT_KEY)
 
     try {
       const systemPrompt = buildSystemPrompt()
