@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-bg-base: #F5F2ED;
+  --color-bg-card: #FDFAF7;
+  --color-accent-black: #0F0F0F;
+  --color-accent-warm: #C4784A;
+  --color-text-primary: #0F0F0F;
+  --color-text-secondary: #6B6560;
+  --color-text-muted: #A8A29E;
+  --color-border: #E8E3DC;
+  --color-fit-green: #4A7C59;
+  --color-fit-amber: #C4944A;
+  --color-fit-red: #C4534A;
+
+  --font-family-display: 'Playfair Display', serif;
+  --font-family-sans: 'DM Sans', sans-serif;
+  --font-family-mono: 'DM Mono', monospace;
+
+  --width-app: 430px;
+}
+
+body {
+  background-color: var(--color-bg-base);
+  font-family: var(--font-family-sans);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+.grain-overlay {
+  position: relative;
+}
+
+.grain-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.card {
+  background: var(--color-bg-card);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(15, 15, 15, 0.06), 0 1px 2px rgba(15, 15, 15, 0.04);
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.card-hover {
+  background: var(--color-bg-card);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(15, 15, 15, 0.06), 0 1px 2px rgba(15, 15, 15, 0.04);
+  position: relative;
+  transition: all 0.2s;
+}
+
+.card-hover:hover {
+  box-shadow: 0 4px 6px rgba(15, 15, 15, 0.1);
+  border-color: rgba(196, 120, 74, 0.2);
+}
+
+.btn-primary {
+  width: 100%;
+  background: var(--color-accent-black);
+  color: white;
+  font-family: var(--font-family-display);
+  font-size: 1.125rem;
+  padding: 1rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: transform 0.1s;
+  box-shadow: 0 4px 12px rgba(15, 15, 15, 0.15);
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  width: 100%;
+  border: 2px solid var(--color-accent-black);
+  color: var(--color-accent-black);
+  font-family: var(--font-family-sans);
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.2s;
+  background: transparent;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--color-accent-black);
+  color: white;
+}
+
+.input {
+  width: 100%;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: rgba(196, 120, 74, 0.3);
+  border-color: var(--color-accent-warm);
+}
+
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

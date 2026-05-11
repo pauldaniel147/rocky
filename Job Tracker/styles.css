@@ -1,0 +1,318 @@
+/* ───── Rocky design tokens ────────────────────────────────────
+   Editorial-magazine warmth. Cream paper, near-black ink, one
+   dusty-terracotta accent. No cold tones.
+   ─────────────────────────────────────────────────────────── */
+
+:root {
+  /* paper / ink */
+  --paper:        #f1eadc;          /* warm cream — main bg */
+  --paper-deep:   #ebe2d0;          /* slightly darker cream — section bg */
+  --card:         #fbf6ea;          /* soft warm white — cards */
+  --card-raised:  #fffaf0;          /* highest paper */
+  --ink:          #1a1714;          /* warm near-black */
+  --ink-2:        #3a342d;          /* deep brown-grey */
+  --ink-soft:     #6a6258;          /* secondary text */
+  --ink-mute:     #9a9082;          /* tertiary / labels */
+  --rule:         #d8cdb8;          /* hairline rules */
+  --rule-soft:    #e6dcc8;
+
+  /* accent — aged terracotta */
+  --terra:        #b15a3a;
+  --terra-deep:   #8d4226;
+  --terra-soft:   #e6c8b6;
+  --terra-wash:   #f3e4d6;
+
+  /* status hues — all warm/muted */
+  --olive:        #6b6e3a;
+  --olive-soft:   #d6d3b3;
+  --sand:         #b8954a;
+  --sand-soft:    #ecdfba;
+  --rust:         #9a4a36;
+  --rust-soft:    #e6c4b3;
+
+  /* type */
+  --serif:  'Instrument Serif', 'Cormorant Garamond', Georgia, serif;
+  --sans:   'Geist', 'Söhne', -apple-system, system-ui, sans-serif;
+  --mono:   'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* ── grain texture (SVG noise) — apply to .paper ────────────── */
+.paper {
+  background-color: var(--paper);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+}
+
+.paper-deep {
+  background-color: var(--paper-deep);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+}
+
+.card-grain {
+  background-color: var(--card);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.025 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* ── text helpers ───────────────────────────────────────────── */
+.serif         { font-family: var(--serif); font-weight: 400; letter-spacing: -0.01em; }
+.serif-it      { font-family: var(--serif); font-style: italic; font-weight: 400; }
+.sans          { font-family: var(--sans); }
+.mono          { font-family: var(--mono); }
+
+.eyebrow {
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-weight: 500;
+}
+
+.eyebrow-ink {
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.rule-h {
+  height: 1px;
+  background: var(--rule);
+  border: 0;
+}
+
+.rule-thick {
+  height: 1px;
+  background: var(--ink);
+  border: 0;
+}
+
+/* card / surface */
+.r-card {
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 1px 2px rgba(60, 40, 20, 0.04),
+    0 8px 24px -16px rgba(60, 40, 20, 0.18);
+}
+
+.r-card-flat {
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--rule-soft);
+}
+
+/* warm CTA pill (full width) */
+.r-cta {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: transform .15s, background .2s;
+  border: none;
+  width: 100%;
+  box-shadow: 0 6px 20px -8px rgba(26,23,20,0.5);
+}
+.r-cta:active { transform: scale(0.98); }
+
+.r-cta-ghost {
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px 18px;
+  background: transparent;
+  color: var(--ink);
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 15px;
+  border: 1px solid var(--ink);
+  cursor: pointer;
+}
+
+/* fit dot */
+.fit-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block;
+}
+
+/* small chip */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.chip.terra { color: var(--terra-deep); border-color: var(--terra-soft); background: var(--terra-wash); }
+.chip.olive { color: var(--olive); border-color: var(--olive-soft); background: rgba(214,211,179,0.4); }
+.chip.ink   { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+
+/* ── web app shell — sidebar + main ─────────────────────────── */
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100%;
+  font-family: var(--sans);
+  color: var(--ink);
+}
+
+.sidebar {
+  border-right: 1px solid var(--rule);
+  padding: 28px 22px 24px;
+  display: flex; flex-direction: column;
+  background-color: var(--paper-deep);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+}
+
+.wordmark {
+  font-family: var(--serif);
+  font-size: 32px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1;
+  display: flex; align-items: baseline; gap: 6px;
+}
+.wordmark .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--terra);
+  display: inline-block;
+  transform: translateY(-3px);
+}
+
+.nav {
+  margin-top: 38px;
+  display: flex; flex-direction: column;
+  gap: 2px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  letter-spacing: -0.005em;
+  font-weight: 450;
+}
+.nav-item .num {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-mute);
+  width: 14px;
+  text-align: right;
+}
+.nav-item.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.nav-item.active .num { color: var(--paper); opacity: 0.7; }
+.nav-item:hover:not(.active) { background: rgba(0,0,0,0.04); color: var(--ink); }
+
+.profile {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12.5px;
+}
+.profile .avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--serif);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.main {
+  position: relative;
+  overflow: auto;
+  background-color: var(--paper);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+}
+.main::-webkit-scrollbar { display: none; }
+.main { scrollbar-width: none; }
+
+/* page top utility row */
+.top-utility {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 36px 0;
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.top-utility .right { display: flex; gap: 18px; align-items: center; }
+.top-utility .pill {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  letter-spacing: 0.08em;
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+
+/* drop number — drop cap for editorial */
+.drop {
+  font-family: var(--serif);
+  font-size: 56px;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+/* circular progress (uses conic-gradient) */
+.ring {
+  --val: 78;
+  --c: var(--terra);
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background:
+    conic-gradient(var(--c) calc(var(--val) * 1%), var(--rule-soft) 0);
+  display: flex; align-items: center; justify-content: center;
+}
+.ring::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: var(--card);
+}
+
+/* hide scrollbars inside frames */
+.scroll-y { overflow-y: auto; overflow-x: hidden; }
+.scroll-x { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+.scroll-y::-webkit-scrollbar, .scroll-x::-webkit-scrollbar { display: none; }
+.scroll-y, .scroll-x { scrollbar-width: none; }
+
+/* small subtle pattern for empty/section dividers */
+.dot-rule {
+  height: 1px;
+  background-image: linear-gradient(to right, var(--rule) 50%, transparent 50%);
+  background-size: 6px 1px;
+  background-repeat: repeat-x;
+}
