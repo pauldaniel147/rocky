@@ -1,10 +1,10 @@
-// Web search for company intelligence using Brave Search API
+// Web search for company intelligence using Serper API (Google Search)
 import { storage } from './storage'
 
-const BRAVE_SEARCH_API = 'https://api.search.brave.com/res/v1/web/search'
+const SERPER_API = 'https://google.serper.dev/search'
 
 export async function searchCompanyInfo(companyName) {
-  const apiKey = storage.getBraveSearchKey()
+  const apiKey = storage.getSearchApiKey()
 
   // If no API key, return null (search is optional)
   if (!apiKey) {
@@ -13,36 +13,40 @@ export async function searchCompanyInfo(companyName) {
 
   try {
     const query = `${companyName} news funding layoffs culture reviews 2025 2026`
-    const response = await fetch(`${BRAVE_SEARCH_API}?q=${encodeURIComponent(query)}&count=5`, {
+    const response = await fetch(SERPER_API, {
+      method: 'POST',
       headers: {
-        'Accept': 'application/json',
-        'Accept-Encoding': 'gzip',
-        'X-Subscription-Token': apiKey,
+        'X-API-KEY': apiKey,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        q: query,
+        num: 5,
+      }),
     })
 
     if (!response.ok) {
-      console.error('Brave Search API error:', response.status)
+      console.error('Serper API error:', response.status)
       return null
     }
 
     const data = await response.json()
 
     // Extract relevant info from search results
-    if (!data.web?.results || data.web.results.length === 0) {
+    if (!data.organic || data.organic.length === 0) {
       return null
     }
 
-    const results = data.web.results.slice(0, 5).map(result => ({
+    const results = data.organic.slice(0, 5).map(result => ({
       title: result.title,
-      description: result.description,
-      url: result.url,
-      age: result.age, // How recent the result is
+      description: result.snippet,
+      url: result.link,
+      date: result.date, // Publication date if available
     }))
 
     // Format for Claude
     const summary = results.map((r, i) =>
-      `${i + 1}. ${r.title}\n   ${r.description}\n   Source: ${r.url}${r.age ? ` (${r.age})` : ''}`
+      `${i + 1}. ${r.title}\n   ${r.description}\n   Source: ${r.url}${r.date ? ` (${r.date})` : ''}`
     ).join('\n\n')
 
     return {
