@@ -9,16 +9,6 @@ import { parseAIResponse } from '../../lib/json-utils'
 export function DailyDigest() {
   const navigate = useNavigate()
 
-  // Ensure profile exists before proceeding
-  const profile = storage.getProfile()
-  if (!profile || !profile.name) {
-    return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p>Please complete your profile setup first.</p>
-      </div>
-    )
-  }
-
   // Detect time of day
   const currentHour = new Date().getHours()
   const isEvening = currentHour >= 17 // 5 PM or later
@@ -49,6 +39,18 @@ export function DailyDigest() {
     cachedDigest?.tomorrowPreview?.map((t, i) => ({ ...t, done: initialTaskState[i] || false })) || []
   )
   const { generate, loading, error } = useAI()
+
+  // Check profile after all hooks
+  const profile = storage.getProfile()
+  const hasProfile = profile && profile.name
+
+  if (!hasProfile) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <p>Please complete your profile setup first.</p>
+      </div>
+    )
+  }
 
   useEffect(() => {
     // Only generate if no cache exists
