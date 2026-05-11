@@ -571,6 +571,7 @@ export function JobDetailPanel({ job, onClose, onArchive, onUnarchive, updateJob
                   <button
                     onClick={handleReanalyze}
                     disabled={reanalyzing || !job.jd}
+                    title={!job.jd ? 'Add a job description to enable re-analysis' : ''}
                     style={{
                       flex: 1,
                       padding: '12px 20px',
