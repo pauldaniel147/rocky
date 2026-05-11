@@ -2,6 +2,11 @@ import { useState } from 'react'
 import { usePipeline } from '../hooks/useStorage'
 import { motion } from 'framer-motion'
 import { JobDetailPanel } from '../components/pipeline/JobDetailPanel'
+import { ManualAddJobModal } from '../components/pipeline/ManualAddJobModal'
+import { useAI } from '../hooks/useAI'
+import { prescreenPrompt } from '../lib/prompts'
+import { storage } from '../lib/storage'
+import { parseAIResponse } from '../lib/json-utils'
 
 const STAGES = [
   { id: 'saved', label: 'Saved', color: '#9a9082' },
@@ -13,7 +18,7 @@ const STAGES = [
 ]
 
 export function PipelinePage() {
-  const { pipeline, updateJob, deleteJob } = usePipeline()
+  const { pipeline, updateJob, deleteJob, addJob } = usePipeline()
   const [draggedJob, setDraggedJob] = useState(null)
   const [selectedJob, setSelectedJob] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -22,6 +27,9 @@ export function PipelinePage() {
   const [showArchived, setShowArchived] = useState(false)
   const [bulkMode, setBulkMode] = useState(false)
   const [selectedJobs, setSelectedJobs] = useState([])
+  const [showManualAdd, setShowManualAdd] = useState(false)
+  const [analyzingJobId, setAnalyzingJobId] = useState(null)
+  const { generate } = useAI()
 
   const handleDelete = (jobId, e) => {
     e.stopPropagation()
@@ -65,6 +73,47 @@ export function PipelinePage() {
     selectedJobs.forEach(jobId => updateJob(jobId, { stage }))
     setSelectedJobs([])
     setBulkMode(false)
+  }
+
+  const handleManualAddJob = async (jobData) => {
+    // Add job to pipeline immediately
+    const newJob = addJob(jobData)
+
+    // If JD is provided, enrich with AI insights in the background
+    if (jobData.jd && jobData.jd.trim()) {
+      setAnalyzingJobId(newJob.id)
+
+      try {
+        const preferences = storage.getPreferences()
+        const profile = storage.getProfile()
+        const systemPrompt = prescreenPrompt(preferences, profile)
+
+        const salaryText = jobData.salary
+          ? `\nSalary Range: ${jobData.salary.expectedMin || ''}${jobData.salary.expectedMin && jobData.salary.expectedMax ? ' - ' : ''}${jobData.salary.expectedMax || ''} LPA`
+          : ''
+
+        const userMessage = `Job URL: ${jobData.jobUrl || 'Not provided'}\n\nCompany: ${jobData.company}\nRole: ${jobData.role}${salaryText}\n\nJob Description:\n${jobData.jd}`
+
+        const response = await generate(systemPrompt, userMessage, 2500)
+        const analysisData = parseAIResponse(response)
+
+        // Update job with AI insights
+        updateJob(newJob.id, {
+          fitScore: analysisData.fitScore,
+          verdict: analysisData.verdict,
+          greenFlags: analysisData.greenFlags,
+          redFlags: analysisData.redFlags,
+          reasoning: analysisData.reasoning,
+          companyInsights: analysisData.companyInsights || '',
+          productInsights: analysisData.productInsights || '',
+        })
+      } catch (err) {
+        console.error('AI enrichment failed:', err)
+        // Job is already added, just skip enrichment
+      } finally {
+        setAnalyzingJobId(null)
+      }
+    }
   }
 
   const handleDragStart = (job) => {
@@ -171,22 +220,40 @@ export function PipelinePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <span>III · PIPELINE · {showArchived ? `${archivedCount} ARCHIVED` : `${activePipeline.length} ACTIVE`}</span>
           {!showArchived && !bulkMode && (
-            <button
-              onClick={() => setBulkMode(true)}
-              style={{
-                padding: '4px 10px',
-                background: 'transparent',
-                border: '1px solid #d8cdb8',
-                borderRadius: '6px',
-                fontSize: '10px',
-                color: '#6a6258',
-                cursor: 'pointer',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-              }}
-            >
-              Bulk Actions
-            </button>
+            <>
+              <button
+                onClick={() => setShowManualAdd(true)}
+                style={{
+                  padding: '4px 10px',
+                  background: '#1a1714',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '10px',
+                  color: '#f1eadc',
+                  cursor: 'pointer',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                + Add Job
+              </button>
+              <button
+                onClick={() => setBulkMode(true)}
+                style={{
+                  padding: '4px 10px',
+                  background: 'transparent',
+                  border: '1px solid #d8cdb8',
+                  borderRadius: '6px',
+                  fontSize: '10px',
+                  color: '#6a6258',
+                  cursor: 'pointer',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Bulk Actions
+              </button>
+            </>
           )}
           {bulkMode && (
             <button
@@ -651,6 +718,25 @@ export function PipelinePage() {
                         y: -2,
                       }}
                     >
+                      {/* AI analyzing indicator */}
+                      {analyzingJobId === job.id && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          padding: '4px 8px',
+                          background: '#c4944a',
+                          color: '#fff',
+                          borderRadius: '6px',
+                          fontSize: '10px',
+                          fontWeight: 600,
+                          letterSpacing: '0.05em',
+                          textTransform: 'uppercase',
+                        }}>
+                          Analyzing...
+                        </div>
+                      )}
+
                       {/* Bulk select checkbox */}
                       {bulkMode && (
                         <input
@@ -817,6 +903,12 @@ export function PipelinePage() {
           }}
         />
       )}
+
+      <ManualAddJobModal
+        isOpen={showManualAdd}
+        onClose={() => setShowManualAdd(false)}
+        onAdd={handleManualAddJob}
+      />
     </div>
   )
 }
